@@ -7,7 +7,8 @@ from ast_type import (Program,
                       ReturnStatement,
                       ExpressionStatement,
                       Expression,
-                      Identifier)
+                      Identifier,
+                      IntegerLiteral)
 from typing import List, Dict, Optional
 from enum import IntEnum, auto
 
@@ -32,6 +33,7 @@ class Parser():
         self.infix_parse_funcs: dict = {}
 
         self.register_prefix(TokenType.IDENT, self.parse_identifier)
+        self.register_prefix(TokenType.INT, self.parse_integer_literal)
 
         self.next_token()
         self.next_token()
@@ -127,6 +129,9 @@ class Parser():
 
     def parse_identifier(self) -> Expression:
         return Identifier(token=self.cur_token, value=self.cur_token.literal)
+
+    def parse_integer_literal(self) -> Expression:
+        return IntegerLiteral(token=self.cur_token, value=int(self.cur_token.literal))
 
 
 

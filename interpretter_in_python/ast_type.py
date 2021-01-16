@@ -13,6 +13,7 @@ class Node(ABC):
 @dataclass
 class Statement(Node):
     token: Token
+
     def token_literal(self):
         return self.token.literal
 
@@ -20,6 +21,7 @@ class Statement(Node):
 @dataclass
 class Expression(Node):
     token: Token
+
     def token_literal(self):
         return self.token.literal
 
@@ -31,17 +33,20 @@ class Program(Node):
     def token_literal(self):
         return self.statements[0].token_literal() if self.statements else ""
 
-
 @dataclass
 class Identifier(Expression):
     value: str
 
 
+@dataclass
+class IntegerLiteral(Expression):
+    value: int
 
 @dataclass
 class LetStatement(Statement):
     name: Identifier
     value: Expression
+
 
 @dataclass
 class ReturnStatement(Statement):
@@ -51,3 +56,4 @@ class ReturnStatement(Statement):
 @dataclass
 class ExpressionStatement(Statement):
     expression: Expression
+
