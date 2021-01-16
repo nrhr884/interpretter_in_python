@@ -46,3 +46,8 @@ class LetStatement(Statement):
 @dataclass
 class ReturnStatement(Statement):
     return_value: Expression
+
+
+@dataclass
+class ExpressionStatement(Statement):
+    expression: Expression

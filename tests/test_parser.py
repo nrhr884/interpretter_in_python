@@ -1,4 +1,4 @@
-from ast_type import Program, Identifier, LetStatement, ReturnStatement
+from ast_type import Program, Identifier, LetStatement, ReturnStatement, Expression, ExpressionStatement
 from lexer import Lexer
 from monkey_parser import Parser
 
@@ -54,3 +54,17 @@ def test_let_statements():
     for stmt in program.statements:
         assert stmt.token_literal() == "return"
         assert isinstance(stmt, ReturnStatement)
+
+
+def test_identifier_expression():
+    src = "foobar;"
+
+    program = parse(src)
+
+    assert len(program.statements) == 1
+    stmt = program.statements[0]
+
+    assert isinstance(stmt, ExpressionStatement)
+    assert isinstance(stmt.expression, Identifier)
+    assert stmt.expression.value == "foobar"
+    assert stmt.expression.token_literal() == "foobar"
