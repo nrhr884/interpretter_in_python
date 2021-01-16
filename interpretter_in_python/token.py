@@ -10,6 +10,16 @@ class TokenType(Enum):
 
     ASSIGN = '='
     PLUS = '+'
+    MINUS = '-'
+    BANG = '!'
+    ASTERISK = '*'
+    SLASH = '/'
+
+    LT = '<'
+    GT = '>'
+
+    EQ = '=='
+    NOT_EQ = '!='
 
     COMMA = ','
     SEMICLOLON = ';'
@@ -21,6 +31,11 @@ class TokenType(Enum):
 
     FUNCTION = 'FUNCTION'
     LET = 'LET'
+    TRUE = 'TRUE'
+    FALSE = 'FALSE'
+    IF = 'IF'
+    ELSE = 'ELSE'
+    RETURN = 'RETURN'
 
 @dataclasses.dataclass
 class Token:

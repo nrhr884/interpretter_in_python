@@ -9,12 +9,15 @@ class Lexer:
         self.read_char()
 
     def read_char(self):
-        if self.read_position >= len(self.input_str):
-            self.ch = 0
-        else:
-            self.ch = self.input_str[self.read_position]
+        self.ch = self.peek_char()
         self.position = self.read_position
         self.read_position += 1
+
+    def peek_char(self):
+        if self.read_position >= len(self.input_str):
+            return 0
+        else:
+            return self.input_str[self.read_position]
 
     def read_identifier(self):
         position = self.position
@@ -31,7 +34,12 @@ class Lexer:
     def lookup_ident(self, ident: str):
         keywords = {
             'fn' : TokenType.FUNCTION,
-            'let' : TokenType.LET
+            'let' : TokenType.LET,
+            'true' : TokenType.TRUE,
+            'false' : TokenType.FALSE,
+            'if' : TokenType.IF,
+            'else' : TokenType.ELSE,
+            'return' : TokenType.RETURN,
         }
         return keywords.get(ident, TokenType.IDENT)
 
@@ -41,12 +49,16 @@ class Lexer:
 
     def next_token(self):
         char_to_toke_type = {
-            '=': TokenType.ASSIGN,
+            '+': TokenType.PLUS,
+            '-': TokenType.MINUS,
+            '*': TokenType.ASTERISK,
+            '/': TokenType.SLASH,
+            '<': TokenType.LT,
+            '>': TokenType.GT,
             ';': TokenType.SEMICLOLON,
             '(': TokenType.LPAREN,
             ')': TokenType.RPAREN,
             ',': TokenType.COMMA,
-            '+': TokenType.PLUS,
             '{': TokenType.LBRACE,
             '}': TokenType.RBRACE,
         }
@@ -55,6 +67,20 @@ class Lexer:
 
         if tokenType := char_to_toke_type.get(self.ch):
             token = Token(tokenType, self.ch)
+        elif self.ch == '=':
+            if self.peek_char() == '=':
+                ch = self.ch
+                self.read_char()
+                token = Token(TokenType.EQ, ch + self.ch)
+            else:
+                token = Token(TokenType.ASSIGN, self.ch)
+        elif self.ch == '!':
+            if self.peek_char() == '=':
+                ch = self.ch
+                self.read_char()
+                token = Token(TokenType.NOT_EQ, ch + self.ch)
+            else:
+                token = Token(TokenType.BANG, self.ch)
         elif self.ch == 0:
             token = Token(TokenType.EOF, '')
         elif self.ch.isalpha():
