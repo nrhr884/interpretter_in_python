@@ -5,10 +5,12 @@ from ast_type import (
     ReturnStatement,
     Expression,
     ExpressionStatement,
-    IntegerLiteral
+    IntegerLiteral,
+    PrefixExpression
     )
 from lexer import Lexer
 from monkey_parser import Parser
+import pytest
 
 
 def check_parse_errors(parser: Parser):
@@ -78,15 +80,23 @@ def test_identifier_expression():
     assert stmt.expression.token_literal() == "foobar"
 
 
-def test_integer_literal_expression():
-    src = "5;"
+def assert_integer_literal_expression(expression: Expression, value: int):
+    assert isinstance(expression, IntegerLiteral)
+    assert expression.value == value
+    assert expression.token_literal() == str(value)
 
+
+@pytest.mark.parametrize("src, operator, integer_value", [
+    ("!5;", "!", 5),
+    ("-15;", "-", 15),
+])
+def test_parsing_prefix_expressions(src, operator, integer_value):
     program = parse(src)
 
     assert len(program.statements) == 1
     stmt = program.statements[0]
 
     assert isinstance(stmt, ExpressionStatement)
-    assert isinstance(stmt.expression, IntegerLiteral)
-    assert stmt.expression.value == 5
-    assert stmt.expression.token_literal() == "5"
+    assert isinstance(stmt.expression, PrefixExpression)
+    assert stmt.expression.operator == operator
+    assert_integer_literal_expression(stmt.expression.right, integer_value)

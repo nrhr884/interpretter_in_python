@@ -43,6 +43,11 @@ class IntegerLiteral(Expression):
     value: int
 
 @dataclass
+class PrefixExpression(Expression):
+    operator: str
+    right: Expression
+
+@dataclass
 class LetStatement(Statement):
     name: Identifier
     value: Expression

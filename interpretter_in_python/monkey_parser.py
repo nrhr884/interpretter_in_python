@@ -8,7 +8,8 @@ from ast_type import (Program,
                       ExpressionStatement,
                       Expression,
                       Identifier,
-                      IntegerLiteral)
+                      IntegerLiteral,
+                      PrefixExpression)
 from typing import List, Dict, Optional
 from enum import IntEnum, auto
 
@@ -34,6 +35,8 @@ class Parser():
 
         self.register_prefix(TokenType.IDENT, self.parse_identifier)
         self.register_prefix(TokenType.INT, self.parse_integer_literal)
+        self.register_prefix(TokenType.BANG, self.parse_prefix_expression)
+        self.register_prefix(TokenType.MINUS, self.parse_prefix_expression)
 
         self.next_token()
         self.next_token()
@@ -58,6 +61,11 @@ class Parser():
     def peek_error(self, token_type: TokenType):
         self.errors.append(
             f"expected next token to be {token_type}, got {self.peek_token.type} insted")
+
+    def no_prefix_parse_func_error(self, token_type: TokenType):
+        self.errors.append(
+            f"no prefix parse function for {token_type} found"
+        )
 
     def register_prefix(self, token_type: TokenType, func):
         self.prefix_parse_funcs[token_type] = func
@@ -125,6 +133,7 @@ class Parser():
         prefix = self.prefix_parse_funcs.get(self.cur_token.type, None)
         if prefix:
             return prefix()
+        self.no_prefix_parse_func_error(self.cur_token.type)
         return None
 
     def parse_identifier(self) -> Expression:
@@ -132,6 +141,15 @@ class Parser():
 
     def parse_integer_literal(self) -> Expression:
         return IntegerLiteral(token=self.cur_token, value=int(self.cur_token.literal))
+
+    def parse_prefix_expression(self) -> Expression:
+        token = self.cur_token
+        operator = self.cur_token.literal
+
+        self.next_token()
+
+        return PrefixExpression(token=token, operator=operator, right=self.parse_expression(OpPrecedence.PREFIX))
+
 
 
 
