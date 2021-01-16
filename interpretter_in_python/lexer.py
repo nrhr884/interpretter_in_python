@@ -1,4 +1,4 @@
-from interpretter_in_python.token import TokenType, Token
+from token_type import TokenType, Token
 
 class Lexer:
     def __init__(self, input_str: str):
@@ -21,13 +21,13 @@ class Lexer:
 
     def read_identifier(self):
         position = self.position
-        while self.ch.isalpha():
+        while self.ch != 0 and self.ch.isalpha():
             self.read_char()
         return self.input_str[position: self.position]
 
     def read_number(self):
         position = self.position
-        while self.ch.isdigit():
+        while self.ch != 0 and self.ch.isdigit():
             self.read_char()
         return self.input_str[position: self.position]
 

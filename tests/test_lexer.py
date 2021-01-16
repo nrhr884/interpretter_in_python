@@ -1,5 +1,5 @@
-from interpretter_in_python.lexer import Lexer
-from interpretter_in_python.token import Token, TokenType
+from lexer import Lexer
+from token_type import Token, TokenType
 
 def test_next_token():
     input_str = '''let five = 5;
