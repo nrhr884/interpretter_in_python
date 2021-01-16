@@ -63,6 +63,17 @@ class PrefixExpression(Expression):
     def string(self):
         return f"({self.operator}{self.right.string()})"
 
+
+@dataclass
+class InfixExpression(Expression):
+    left: Expression
+    operator: str
+    right: Expression
+
+    def string(self):
+        return f"({self.left.string()} {self.operator} {self.right.string()})"
+
+
 @dataclass
 class LetStatement(Statement):
     name: Identifier

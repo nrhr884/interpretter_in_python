@@ -9,7 +9,8 @@ from ast_type import (Program,
                       Expression,
                       Identifier,
                       IntegerLiteral,
-                      PrefixExpression)
+                      PrefixExpression,
+                      InfixExpression)
 from typing import List, Dict, Optional
 from enum import IntEnum, auto
 
@@ -22,6 +23,18 @@ class OpPrecedence(IntEnum):
     PRODUCT = auto()
     PREFIX = auto()
     CALL = auto()
+
+
+precendences = {
+    TokenType.EQ: OpPrecedence.EQUALS,
+    TokenType.NOT_EQ: OpPrecedence.EQUALS,
+    TokenType.LT: OpPrecedence.LESSGREATER,
+    TokenType.GT: OpPrecedence.LESSGREATER,
+    TokenType.PLUS: OpPrecedence.SUM,
+    TokenType.MINUS: OpPrecedence.SUM,
+    TokenType.SLASH: OpPrecedence.PRODUCT,
+    TokenType.ASTERISK: OpPrecedence.PRODUCT,
+}
 
 
 class Parser():
@@ -37,6 +50,15 @@ class Parser():
         self.register_prefix(TokenType.INT, self.parse_integer_literal)
         self.register_prefix(TokenType.BANG, self.parse_prefix_expression)
         self.register_prefix(TokenType.MINUS, self.parse_prefix_expression)
+
+        self.register_infix(TokenType.PLUS, self.parse_infix_expression)
+        self.register_infix(TokenType.MINUS, self.parse_infix_expression)
+        self.register_infix(TokenType.SLASH, self.parse_infix_expression)
+        self.register_infix(TokenType.ASTERISK, self.parse_infix_expression)
+        self.register_infix(TokenType.EQ, self.parse_infix_expression)
+        self.register_infix(TokenType.NOT_EQ, self.parse_infix_expression)
+        self.register_infix(TokenType.LT, self.parse_infix_expression)
+        self.register_infix(TokenType.GT, self.parse_infix_expression)
 
         self.next_token()
         self.next_token()
@@ -57,6 +79,12 @@ class Parser():
             return True
         self.peek_error(token_type)
         return False
+
+    def cur_precendence(self) -> OpPrecedence:
+        return precendences.get(self.cur_token.type, OpPrecedence.LOWEST)
+
+    def peek_precendence(self) -> OpPrecedence:
+        return precendences.get(self.peek_token.type, OpPrecedence.LOWEST)
 
     def peek_error(self, token_type: TokenType):
         self.errors.append(
@@ -131,10 +159,21 @@ class Parser():
 
     def parse_expression(self, precendence: OpPrecedence) -> Optional[Expression]:
         prefix = self.prefix_parse_funcs.get(self.cur_token.type, None)
-        if prefix:
-            return prefix()
-        self.no_prefix_parse_func_error(self.cur_token.type)
-        return None
+        if not prefix:
+            self.no_prefix_parse_func_error(self.cur_token.type)
+            return None
+        left_expression = prefix()
+
+        while not self.peek_token_is(TokenType.SEMICLOLON) and precendence < self.peek_precendence():
+            infix = self.infix_parse_funcs.get(self.peek_token.type, None)
+            if not infix:
+                return left_expression
+
+            self.next_token()
+            left_expression = infix(left_expression)
+
+        return left_expression
+
 
     def parse_identifier(self) -> Expression:
         return Identifier(token=self.cur_token, value=self.cur_token.literal)
@@ -149,6 +188,20 @@ class Parser():
         self.next_token()
 
         return PrefixExpression(token=token, operator=operator, right=self.parse_expression(OpPrecedence.PREFIX))
+
+    def parse_infix_expression(self, left: Expression) -> Expression:
+        token = self.cur_token
+        operator = self.cur_token.literal
+
+        precendence = self.cur_precendence()
+        self.next_token()
+        return InfixExpression(
+            token = token,
+            left = left,
+            operator = operator,
+            right = self.parse_expression(precendence)
+        )
+
 
 
 

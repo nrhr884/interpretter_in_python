@@ -6,7 +6,8 @@ from ast_type import (
     Expression,
     ExpressionStatement,
     IntegerLiteral,
-    PrefixExpression
+    PrefixExpression,
+    InfixExpression
     )
 from lexer import Lexer
 from monkey_parser import Parser
@@ -100,3 +101,26 @@ def test_parsing_prefix_expressions(src, operator, integer_value):
     assert isinstance(stmt.expression, PrefixExpression)
     assert stmt.expression.operator == operator
     assert_integer_literal_expression(stmt.expression.right, integer_value)
+
+
+@pytest.mark.parametrize("src, left_value, operator, right_value", [
+    ("5 + 5;", 5, "+", 5),
+    ("5 - 5;", 5, "-", 5),
+    ("5 * 5;", 5, "*", 5),
+    ("5 / 5;", 5, "/", 5),
+    ("5 > 5;", 5, ">", 5),
+    ("5 < 5;", 5, "<", 5),
+    ("5 == 5;", 5, "==", 5),
+    ("5 != 5;", 5, "!=", 5),
+])
+def test_parsing_infix_expressions(src, left_value, operator, right_value):
+    program = parse(src)
+
+    assert len(program.statements) == 1
+    stmt = program.statements[0]
+
+    assert isinstance(stmt, ExpressionStatement)
+    assert isinstance(stmt.expression, InfixExpression)
+    assert stmt.expression.operator == operator
+    assert_integer_literal_expression(stmt.expression.left, left_value)
+    assert_integer_literal_expression(stmt.expression.right, right_value)
