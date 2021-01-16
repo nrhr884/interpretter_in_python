@@ -5,6 +5,7 @@ from ast_type import (Program,
                       Statement,
                       LetStatement,
                       Identifier)
+from typing import List
 
 
 class Parser():
@@ -12,6 +13,7 @@ class Parser():
         self.lexer: Lexer = lexer
         self.cur_token: Optional[Token] = None
         self.peek_token: Optional[Token] = None
+        self.errors: List[str] = []
 
         self.next_token()
         self.next_token()
@@ -30,7 +32,12 @@ class Parser():
         if self.peek_token_is(token_type):
             self.next_token()
             return True
+        self.peek_error(token_type)
         return False
+
+    def peek_error(self, token_type: TokenType):
+        self.errors.append(
+            f"expected next token to be {token_type}, got {self.peek_token.type} insted")
 
     def parse_program(self) -> Program:
         program = Program(statements=[])
