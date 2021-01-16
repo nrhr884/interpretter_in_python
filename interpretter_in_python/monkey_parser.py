@@ -4,6 +4,7 @@ from lexer import Lexer
 from ast_type import (Program,
                       Statement,
                       LetStatement,
+                      ReturnStatement,
                       Identifier)
 from typing import List
 
@@ -50,8 +51,14 @@ class Parser():
         return program
 
     def parse_statement(self) -> Statement:
-        if self.cur_token.type == TokenType.LET:
-            return self.parse_let_statement()
+        parse_funcs = {
+            TokenType.LET: self.parse_let_statement,
+            TokenType.RETURN: self.parse_return_statement,
+        }
+
+        if parse_func := parse_funcs.get(self.cur_token.type):
+            return parse_func()
+
         return None
 
     def parse_let_statement(self) -> LetStatement:
@@ -68,6 +75,16 @@ class Parser():
             self.next_token()
 
         return LetStatement(token=let_token, name=name, value=None)
+
+    def parse_return_statement(self) -> ReturnStatement:
+        return_token = self.cur_token
+
+        self.next_token()
+        while self.cur_token_is(TokenType.SEMICLOLON):
+            self.next_token()
+
+        return ReturnStatement(token=return_token, return_value=None)
+
 
 
 

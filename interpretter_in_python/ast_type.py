@@ -10,12 +10,18 @@ class Node(ABC):
         pass
 
 
+@dataclass
 class Statement(Node):
-    pass
+    token: Token
+    def token_literal(self):
+        return self.token.literal
 
 
+@dataclass
 class Expression(Node):
-    pass
+    token: Token
+    def token_literal(self):
+        return self.token.literal
 
 
 @dataclass
@@ -28,18 +34,15 @@ class Program(Node):
 
 @dataclass
 class Identifier(Expression):
-    token: Token
     value: str
 
-    def token_literal(self):
-        return self.token.literal
 
 
 @dataclass
 class LetStatement(Statement):
-    token: Token
     name: Identifier
     value: Expression
 
-    def token_literal(self):
-        return self.token.literal
+@dataclass
+class ReturnStatement(Statement):
+    return_value: Expression
