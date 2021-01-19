@@ -53,6 +53,7 @@ class Parser():
         self.register_prefix(TokenType.MINUS, self.parse_prefix_expression)
         self.register_prefix(TokenType.TRUE, self.parse_boolean)
         self.register_prefix(TokenType.FALSE, self.parse_boolean)
+        self.register_prefix(TokenType.LPAREN, self.parse_grouped_expression)
 
         self.register_infix(TokenType.PLUS, self.parse_infix_expression)
         self.register_infix(TokenType.MINUS, self.parse_infix_expression)
@@ -207,6 +208,15 @@ class Parser():
             operator = operator,
             right = self.parse_expression(precendence)
         )
+
+    def parse_grouped_expression(self) -> Expression:
+        self.next_token()
+        exp = self.parse_expression(OpPrecedence.LOWEST)
+
+        if not self.expect_peek(TokenType.RPAREN):
+            return None
+
+        return exp
 
 
 
