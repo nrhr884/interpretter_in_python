@@ -6,6 +6,7 @@ from ast_type import (
     ReturnStatement,
     Expression,
     ExpressionStatement,
+    IfExpression,
     IntegerLiteral,
     PrefixExpression,
     InfixExpression
@@ -92,7 +93,7 @@ def assert_literal_expression(expression: Expression, value: Union[int, str, boo
     def assert_identifiler(expression: Expression, value: str):
         assert isinstance(expression, Identifier)
         assert expression.value == value
-        assert expression.token_literal() == str(value)
+        assert expression.token_literal() == value
 
     def assert_boolean(expression: Expression, value: bool):
         assert isinstance(expression, Boolean)
@@ -125,6 +126,11 @@ def test_parsing_prefix_expressions(src, operator, integer_value):
     assert stmt.expression.operator == operator
     assert_literal_expression(stmt.expression.right, integer_value)
 
+def assert_infix_expression(expression: InfixExpression, left_value, operator, right_value):
+    assert isinstance(expression, InfixExpression)
+    assert expression.operator == operator
+    assert_literal_expression(expression.left, left_value)
+    assert_literal_expression(expression.right, right_value)
 
 @pytest.mark.parametrize("src, left_value, operator, right_value", [
     ("5 + 5;", 5, "+", 5),
@@ -147,10 +153,7 @@ def test_parsing_infix_expressions(src, left_value, operator, right_value):
     stmt = program.statements[0]
 
     assert isinstance(stmt, ExpressionStatement)
-    assert isinstance(stmt.expression, InfixExpression)
-    assert stmt.expression.operator == operator
-    assert_literal_expression(stmt.expression.left, left_value)
-    assert_literal_expression(stmt.expression.right, right_value)
+    assert_infix_expression(stmt.expression, left_value, operator, right_value)
 
 @pytest.mark.parametrize("src, expected", [
     ("-a * b", "((-a) * b)"),
@@ -179,3 +182,46 @@ def test_operator_precendence_parsing(src, expected):
     program = parse(src)
     assert program.string() == expected
 
+def test_if_expression():
+    src = 'if (x < y) { x }'
+    program = parse(src)
+
+    assert len(program.statements) == 1
+    stmt = program.statements[0]
+
+    assert isinstance(stmt, ExpressionStatement)
+    assert isinstance(stmt.expression, IfExpression)
+    assert_infix_expression(stmt.expression.condition, "x", "<", "y")
+
+    assert len(stmt.expression.consequence.statements) == 1
+    consequence_stmt = stmt.expression.consequence.statements[0]
+    assert isinstance(consequence_stmt, ExpressionStatement)
+    assert isinstance(consequence_stmt.expression, Identifier)
+
+    assert_literal_expression(consequence_stmt.expression, "x")
+
+    assert not stmt.expression.alternative
+
+
+def test_if_else_expression():
+    src = 'if (x < y) { x } else { y }'
+    program = parse(src)
+
+    assert len(program.statements) == 1
+    stmt = program.statements[0]
+
+    assert isinstance(stmt, ExpressionStatement)
+    assert isinstance(stmt.expression, IfExpression)
+    assert_infix_expression(stmt.expression.condition, "x", "<", "y")
+
+    assert len(stmt.expression.consequence.statements) == 1
+    consequence_stmt = stmt.expression.consequence.statements[0]
+    assert isinstance(consequence_stmt, ExpressionStatement)
+    assert isinstance(consequence_stmt.expression, Identifier)
+    assert_literal_expression(consequence_stmt.expression, "x")
+
+    assert len(stmt.expression.alternative.statements) == 1
+    alternative_stmt = stmt.expression.alternative.statements[0]
+    assert isinstance(alternative_stmt, ExpressionStatement)
+    assert isinstance(alternative_stmt.expression, Identifier)
+    assert_literal_expression(alternative_stmt.expression, "y")

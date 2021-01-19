@@ -5,13 +5,15 @@ from ast_type import (Program,
                       Statement,
                       LetStatement,
                       ReturnStatement,
+                      BlockStatement,
                       ExpressionStatement,
                       Expression,
                       Identifier,
                       Boolean,
                       IntegerLiteral,
                       PrefixExpression,
-                      InfixExpression)
+                      InfixExpression,
+                      IfExpression)
 from typing import List, Dict, Optional
 from enum import IntEnum, auto
 
@@ -54,6 +56,7 @@ class Parser():
         self.register_prefix(TokenType.TRUE, self.parse_boolean)
         self.register_prefix(TokenType.FALSE, self.parse_boolean)
         self.register_prefix(TokenType.LPAREN, self.parse_grouped_expression)
+        self.register_prefix(TokenType.IF, self.parse_if_expression)
 
         self.register_infix(TokenType.PLUS, self.parse_infix_expression)
         self.register_infix(TokenType.MINUS, self.parse_infix_expression)
@@ -217,6 +220,51 @@ class Parser():
             return None
 
         return exp
+
+    def parse_if_expression(self) -> Expression:
+        token = self.cur_token
+
+        if not self.expect_peek(TokenType.LPAREN):
+            return None
+
+        self.next_token()
+        condition = self.parse_expression(OpPrecedence.LOWEST)
+
+        if not self.expect_peek(TokenType.RPAREN):
+            return None
+
+        if not self.expect_peek(TokenType.LBRACE):
+            return None
+
+        consequence = self.parse_block_statement()
+
+        alternative = None
+        if self.peek_token_is(TokenType.ELSE):
+            self.next_token()
+            if not self.expect_peek(TokenType.LBRACE):
+                return None
+            alternative = self.parse_block_statement()
+
+        return IfExpression(
+            token=token,
+            condition=condition,
+            consequence=consequence,
+            alternative=alternative)
+
+    def parse_block_statement(self) -> BlockStatement:
+        token = self.cur_token
+        statements: List[Statement] = []
+
+        self.next_token()
+
+        while not self.cur_token_is(TokenType.RBRACE) and not self.cur_token_is(TokenType.EOF):
+            stmt = self.parse_statement()
+            if stmt:
+                statements.append(stmt)
+            self.next_token()
+
+        return BlockStatement(token=token, statements=statements)
+
 
 
 
