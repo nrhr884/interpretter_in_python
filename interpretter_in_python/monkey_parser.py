@@ -11,6 +11,7 @@ from ast_type import (Program,
                       Identifier,
                       Boolean,
                       IntegerLiteral,
+                      FunctionLiteral,
                       PrefixExpression,
                       InfixExpression,
                       IfExpression)
@@ -57,6 +58,7 @@ class Parser():
         self.register_prefix(TokenType.FALSE, self.parse_boolean)
         self.register_prefix(TokenType.LPAREN, self.parse_grouped_expression)
         self.register_prefix(TokenType.IF, self.parse_if_expression)
+        self.register_prefix(TokenType.FUNCTION, self.parse_function_literal)
 
         self.register_infix(TokenType.PLUS, self.parse_infix_expression)
         self.register_infix(TokenType.MINUS, self.parse_infix_expression)
@@ -265,8 +267,39 @@ class Parser():
 
         return BlockStatement(token=token, statements=statements)
 
+    def parse_function_literal(self) -> Expression:
+        token = self.cur_token
 
+        if not self.expect_peek(TokenType.LPAREN):
+            return None
 
+        parameters = self.parse_function_parameters()
 
+        if not self.expect_peek(TokenType.LBRACE):
+            return None
 
+        body = self.parse_block_statement()
 
+        return FunctionLiteral(token=token, parameters=parameters, body=body)
+
+    def parse_function_parameters(self) -> List[Identifier]:
+        if self.peek_token_is(TokenType.RPAREN):
+            self.next_token()
+            return []
+
+        self.next_token()
+
+        identifiers = [
+            Identifier(
+                token=self.cur_token, value=self.cur_token.literal)
+        ]
+        while self.peek_token_is(TokenType.COMMA):
+            self.next_token()
+            self.next_token()
+            identifiers.append(Identifier(
+                token=self.cur_token, value=self.cur_token.literal))
+
+        if not self.expect_peek(TokenType.RPAREN):
+            return None
+
+        return identifiers

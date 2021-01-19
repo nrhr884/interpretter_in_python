@@ -8,6 +8,7 @@ from ast_type import (
     ExpressionStatement,
     IfExpression,
     IntegerLiteral,
+    FunctionLiteral,
     PrefixExpression,
     InfixExpression
     )
@@ -225,3 +226,22 @@ def test_if_else_expression():
     assert isinstance(alternative_stmt, ExpressionStatement)
     assert isinstance(alternative_stmt.expression, Identifier)
     assert_literal_expression(alternative_stmt.expression, "y")
+
+
+@pytest.mark.parametrize("src, expected_params", [
+    ("fn() { }", []),
+    ("fn(x) { }", ["x"]),
+    ("fn(x, y, z) { }", ["x", "y", "z"])])
+def test_function_literal_parsing(src, expected_params):
+    program = parse(src)
+
+    assert len(program.statements) == 1
+    stmt = program.statements[0]
+    assert isinstance(stmt, ExpressionStatement)
+    assert isinstance(stmt.expression, FunctionLiteral)
+
+    function = stmt.expression
+    assert len(function.parameters) == len(expected_params)
+
+    for actual, expected in zip(function.parameters, expected_params):
+        assert_literal_expression(actual, expected)

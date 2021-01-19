@@ -132,3 +132,18 @@ class IfExpression(Expression):
             strings.append(self.alternative.string())
 
         return "".join(strings)
+
+@dataclass
+class FunctionLiteral(Expression):
+    parameters: List[Identifier]
+    body: BlockStatement
+
+    def string(self):
+        strings = []
+        strings.append(self.token_literal())
+        strings.append("(")
+        strings.append(",".join([p.string() for p in self.parameters]))
+        strings.append(")")
+        strings.append(self.body.stiring())
+
+        return "".join(strings)
