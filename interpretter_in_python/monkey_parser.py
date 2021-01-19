@@ -14,6 +14,7 @@ from ast_type import (Program,
                       FunctionLiteral,
                       PrefixExpression,
                       InfixExpression,
+                      CallExpression,
                       IfExpression)
 from typing import List, Dict, Optional
 from enum import IntEnum, auto
@@ -38,6 +39,7 @@ precendences = {
     TokenType.MINUS: OpPrecedence.SUM,
     TokenType.SLASH: OpPrecedence.PRODUCT,
     TokenType.ASTERISK: OpPrecedence.PRODUCT,
+    TokenType.LPAREN: OpPrecedence.CALL,
 }
 
 
@@ -68,6 +70,7 @@ class Parser():
         self.register_infix(TokenType.NOT_EQ, self.parse_infix_expression)
         self.register_infix(TokenType.LT, self.parse_infix_expression)
         self.register_infix(TokenType.GT, self.parse_infix_expression)
+        self.register_infix(TokenType.LPAREN, self.parse_call_expression)
 
         self.next_token()
         self.next_token()
@@ -303,3 +306,29 @@ class Parser():
             return None
 
         return identifiers
+
+    def parse_call_expression(self, function: Expression) -> Expression:
+        token = self.cur_token
+        arguments = self.parse_call_arguments()
+        return CallExpression(token=token, function=function, arguments=arguments)
+
+    def parse_call_arguments(self) -> List[Expression]:
+        if self.peek_token_is(TokenType.RPAREN):
+            return []
+
+        self.next_token()
+        arguments = [
+            self.parse_expression(OpPrecedence.LOWEST)
+        ]
+
+        while self.peek_token_is(TokenType.COMMA):
+            self.next_token()
+            self.next_token()
+            arguments.append(
+                self.parse_expression(OpPrecedence.LOWEST)
+            )
+
+        if not self.expect_peek(TokenType.RPAREN):
+            return None
+
+        return arguments

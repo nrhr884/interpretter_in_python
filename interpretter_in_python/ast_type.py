@@ -147,3 +147,17 @@ class FunctionLiteral(Expression):
         strings.append(self.body.stiring())
 
         return "".join(strings)
+
+@dataclass
+class CallExpression(Expression):
+    function: Expression
+    arguments: List[Expression]
+
+    def string(self):
+        strings = []
+        strings.append(function.string())
+        strings.append("(")
+        strings.append(",".join([a.string() for a in self.arguments]))
+        strings.append(")")
+
+        return "".join(strings)

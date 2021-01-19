@@ -10,6 +10,7 @@ from ast_type import (
     IntegerLiteral,
     FunctionLiteral,
     PrefixExpression,
+    CallExpression,
     InfixExpression
     )
 from lexer import Lexer
@@ -245,3 +246,23 @@ def test_function_literal_parsing(src, expected_params):
 
     for actual, expected in zip(function.parameters, expected_params):
         assert_literal_expression(actual, expected)
+
+
+def test_call_expression_parsing():
+    src = 'add(1, 2 * 3, 4 + 5);'
+    program = parse(src)
+
+    assert len(program.statements) == 1
+    stmt = program.statements[0]
+
+    assert isinstance(stmt, ExpressionStatement)
+    assert isinstance(stmt.expression, CallExpression)
+
+    exp = stmt.expression
+
+    assert_literal_expression(exp.function, "add")
+
+    assert len(exp.arguments) == 3
+    assert_literal_expression(exp.arguments[0], 1)
+    assert_infix_expression(exp.arguments[1], 2, "*", 3)
+    assert_infix_expression(exp.arguments[2], 4, "+", 5)
