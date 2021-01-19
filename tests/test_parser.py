@@ -38,38 +38,33 @@ def parse(src: str) -> Program:
     return program
 
 
-def test_let_statements():
-    src = '''
-    let x = 5;
-    let y = 10;
-    let foobar = 838383;
-    '''
-
+@pytest.mark.parametrize("src, expected_identifier, expected_value", [
+    ("let x = 5;", "x", 5),
+    ("let y = true;", "y", True),
+    ("let foobar = y;", "foobar", "y")
+])
+def test_let_statements(src, expected_identifier, expected_value):
     program = parse(src)
-    assert len(program.statements) == 3
+    assert len(program.statements) == 1
 
-    expected_identifier = ["x", "y", "foobar"]
+    stmt = program.statements[0]
 
-    for i, stmt in zip(expected_identifier, program.statements):
-        assert stmt.token_literal() == "let"
-        assert isinstance(stmt, LetStatement)
-        assert stmt.name.value == i
-        assert stmt.name.token_literal() == i
+    assert isinstance(stmt, LetStatement)
+    assert_literal_expression(stmt.name, expected_identifier)
+    assert_literal_expression(stmt.value, expected_value)
 
-def test_let_statements():
-    src = '''
-    return 5;
-    return 10;
-    return 838383;
-    '''
-
+@pytest.mark.parametrize("src, expected_value", [
+    ("return 5", 5),
+    ("return true", True),
+])
+def test_return_statements(src, expected_value):
     program = parse(src)
+    assert len(program.statements) == 1
 
-    assert len(program.statements) == 3
+    stmt = program.statements[0]
 
-    for stmt in program.statements:
-        assert stmt.token_literal() == "return"
-        assert isinstance(stmt, ReturnStatement)
+    assert isinstance(stmt, ReturnStatement)
+    assert_literal_expression(stmt.return_value, expected_value)
 
 
 def test_identifier_expression():

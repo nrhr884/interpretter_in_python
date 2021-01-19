@@ -145,20 +145,29 @@ class Parser():
         if not self.expect_peek(TokenType.ASSIGN):
             return None
 
-        while self.cur_token_is(TokenType.SEMICLOLON):
+        self.next_token()
+        value = self.parse_expression(OpPrecedence.LOWEST)
+
+        if self.peek_token_is(TokenType.SEMICLOLON):
             self.next_token()
 
-        return LetStatement(token=let_token, name=name, value=None)
+        return LetStatement(
+            token=let_token,
+            name=name,
+            value=value)
 
     def parse_return_statement(self) -> ReturnStatement:
         return_token = self.cur_token
 
         self.next_token()
+        return_value = self.parse_expression(OpPrecedence.LOWEST)
 
-        while not self.cur_token_is(TokenType.SEMICLOLON):
+        if self.peek_token_is(TokenType.SEMICLOLON):
             self.next_token()
 
-        return ReturnStatement(token=return_token, return_value=None)
+        return ReturnStatement(
+            token=return_token,
+            return_value=return_value)
 
     def parse_expression_statement(self) -> ExpressionStatement:
         stmt = ExpressionStatement(
