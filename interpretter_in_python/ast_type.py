@@ -28,6 +28,9 @@ class Expression(Node):
     def token_literal(self):
         return self.token.literal
 
+    def string(self):
+        return self.token.literal
+
 
 @dataclass
 class Program(Node):
@@ -46,15 +49,15 @@ class Program(Node):
 @dataclass
 class Identifier(Expression):
     value: str
-    def string(self):
-        return self.token.literal
 
 
 @dataclass
 class IntegerLiteral(Expression):
     value: int
-    def string(self):
-        return self.token.literal
+
+@dataclass
+class Boolean(Expression):
+    value: bool
 
 @dataclass
 class PrefixExpression(Expression):

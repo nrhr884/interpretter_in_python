@@ -8,6 +8,7 @@ from ast_type import (Program,
                       ExpressionStatement,
                       Expression,
                       Identifier,
+                      Boolean,
                       IntegerLiteral,
                       PrefixExpression,
                       InfixExpression)
@@ -50,6 +51,8 @@ class Parser():
         self.register_prefix(TokenType.INT, self.parse_integer_literal)
         self.register_prefix(TokenType.BANG, self.parse_prefix_expression)
         self.register_prefix(TokenType.MINUS, self.parse_prefix_expression)
+        self.register_prefix(TokenType.TRUE, self.parse_boolean)
+        self.register_prefix(TokenType.FALSE, self.parse_boolean)
 
         self.register_infix(TokenType.PLUS, self.parse_infix_expression)
         self.register_infix(TokenType.MINUS, self.parse_infix_expression)
@@ -180,6 +183,9 @@ class Parser():
 
     def parse_integer_literal(self) -> Expression:
         return IntegerLiteral(token=self.cur_token, value=int(self.cur_token.literal))
+
+    def parse_boolean(self) -> Expression:
+        return Boolean(token=self.cur_token, value=self.cur_token_is(TokenType.TRUE))
 
     def parse_prefix_expression(self) -> Expression:
         token = self.cur_token
