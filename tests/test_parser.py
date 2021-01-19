@@ -124,3 +124,22 @@ def test_parsing_infix_expressions(src, left_value, operator, right_value):
     assert stmt.expression.operator == operator
     assert_integer_literal_expression(stmt.expression.left, left_value)
     assert_integer_literal_expression(stmt.expression.right, right_value)
+
+@pytest.mark.parametrize("src, expected", [
+    ("-a * b", "((-a) * b)"),
+    ("!-a", "(!(-a))"),
+    ("a + b + c", "((a + b) + c)"),
+    ("a + b - c", "((a + b) - c)"),
+    ("a * b * c", "((a * b) * c)"),
+    ("a * b / c", "((a * b) / c)"),
+    ("a + b / c", "(a + (b / c))"),
+    ("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"),
+    ("3 + 4; -5 + 5", "(3 + 4)((-5) + 5)"),
+    ("5 > 4 == 3 < 4", "((5 > 4) == (3 < 4))"),
+    ("5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))"),
+    ("3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+])
+def test_operator_precendence_parsing(src, expected):
+    program = parse(src)
+    assert program.string() == expected
+

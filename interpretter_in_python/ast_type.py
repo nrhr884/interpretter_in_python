@@ -38,9 +38,9 @@ class Program(Node):
 
     def string(self):
         strings = []
-        for stmt in self.statements():
+        for stmt in self.statements:
             strings.append(stmt.string())
-        return "\n".join(strings)
+        return "".join(strings)
 
 
 @dataclass
