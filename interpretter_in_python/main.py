@@ -2,6 +2,7 @@ import sys
 from lexer import Lexer
 from monkey_parser import Parser
 from token_type import Token, TokenType
+from evaluator import eval
 
 if __name__ == "__main__":
     prompt = '>>'
@@ -20,6 +21,8 @@ if __name__ == "__main__":
             for e in parser.errors:
                 print(f"\t{e}")
         else:
-            print(program.string())
+            evaluated = eval(program)
+            if evaluated:
+                print(evaluated.inspect())
 
         print(prompt, end="", flush=True)

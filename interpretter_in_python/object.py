@@ -24,7 +24,7 @@ class Integer(Object):
     value: int
 
     def inspect(self) -> str:
-        return str(value)
+        return str(self.value)
     
     def type(self) -> ObjectType:
         return ObjectType.INTEGER_OBJ
@@ -35,7 +35,7 @@ class Boolean(Object):
     value: bool
 
     def inspect(self) -> str:
-        return "true" if value else "false"
+        return "true" if self.value else "false"
 
     def type(self) -> ObjectType:
         return ObjectType.BOOLEAN_OBJ
