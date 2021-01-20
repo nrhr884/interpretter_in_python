@@ -144,7 +144,7 @@ class FunctionLiteral(Expression):
         strings.append("(")
         strings.append(",".join([p.string() for p in self.parameters]))
         strings.append(")")
-        strings.append(self.body.stiring())
+        strings.append(self.body.string())
 
         return "".join(strings)
 
