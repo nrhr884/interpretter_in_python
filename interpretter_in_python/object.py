@@ -14,6 +14,7 @@ class Object(ABC):
     @abstractmethod
     def inspect(self) -> str:
         pass
+
     @abstractmethod
     def type(self) -> ObjectType:
         pass
@@ -25,7 +26,7 @@ class Integer(Object):
 
     def inspect(self) -> str:
         return str(self.value)
-    
+
     def type(self) -> ObjectType:
         return ObjectType.INTEGER_OBJ
 
@@ -40,6 +41,7 @@ class Boolean(Object):
     def type(self) -> ObjectType:
         return ObjectType.BOOLEAN_OBJ
 
+
 @dataclass
 class Null(Object):
     value: bool
@@ -49,4 +51,3 @@ class Null(Object):
 
     def type(self) -> ObjectType:
         return ObjectType.NULL_OBJ
-
